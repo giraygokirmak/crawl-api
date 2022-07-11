@@ -58,6 +58,7 @@ class Engine:
             
             selected_maturity = None
             if deposit_df.shape[0]>0:
+                max_amount = deposit_df['AnaPara'].max()
                 for col in deposit_df.columns:
                     if 'AnaPara' not in col:
                         deposit_df[col] = deposit_df[col].astype(float)
@@ -78,16 +79,17 @@ class Engine:
                             if ir.shape[0]>0 and ir.values[0]>0:
                                 selected_maturity = col
 
-                deposit_df = deposit_df[deposit_df[selected_maturity]>0]
-                
                 if selected_maturity in deposit_df.columns:
+                    deposit_df = deposit_df[deposit_df[selected_maturity]>0]
                     if deposit_df.shape[0]>0:
                         tmpDF = pd.DataFrame({'bank': short_name, 'interest_rate':deposit_df[selected_maturity].values[0]},index=[0]) 
-                        if not tmpDF.empty:
+                        if not tmpDF.empty and max_amount>amount:
                             all_options.append(tmpDF)
                             
         if len(all_options)>0:
             all_options = pd.concat(all_options,ignore_index=True)
             return all_options.sort_values(by=['interest_rate'],ascending=[False])
+        else:
+            return pd.DataFrame()
 
               

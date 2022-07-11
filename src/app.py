@@ -23,8 +23,8 @@ class Loan(FlaskForm):
     
 class Deposit(FlaskForm):
     amount = DecimalField('Tutar:', validators=[validators.DataRequired(),
-                                             validators.NumberRange(min=500, max=500000, 
-                                                                    message='500-500000 TL Arası giriş yapılabilir')])
+                                             validators.NumberRange(min=500, max=9999999, 
+                                                                    message='500-9999999 TL Arası giriş yapılabilir')])
     maturity =  SelectField(u'Vade', choices=[('32', '32 Gün'), ('46', '46 Gün'), ('55', '55 Gün'), 
                                              ('92', '92 Gün'), ('181', '181 Gün')])
     submit = SubmitField('Hesapla')    
