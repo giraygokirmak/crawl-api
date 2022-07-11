@@ -63,12 +63,14 @@ def deposit():
         amount = int(form.amount.data)
         maturity = int(form.maturity.data)
         result = engine.calculate_interests(amount,maturity)
-        
+        tax = 0.05 if maturity <= 6 else 0.03
         if result.shape[0]>0:
             for idx,row in result.iterrows():
+                return_amount = (float(row['interest_rate'])*amount*maturity)/36500
                 message.append("Banka: "+ row['bank'].replace('-',' ').upper() + 
                                " / Faiz Oranı: %" + str(row['interest_rate']) + 
-                               " / Toplam Getiri: " + str((float(row['interest_rate'])*amount*maturity)/36500) + "TL")
+                               " / Toplam Brüt Getiri: " + str(int(return_amount)) + "TL" + 
+                               " / Toplam Net Getiri: " + str(int(return_amount-(return_amount*tax))) + "TL" )
         else:
             message = ["Seçilen tutar ve/veya vade süresi uygun değil."]
     return render_template('deposit.html', form=form, message=message)
