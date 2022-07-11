@@ -1,0 +1,42 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+
+{% block title %}
+Mevduat Getiri Kıyaslama
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+    <a class="btn btn-primary" href="loan.html" role="button">Kredi Karşılaştırma</a>
+
+      <h1>Merhaba!</h1>
+
+      <p class="lead">Tüm mevduat getirilerini karşılaştır, en idealini seç!</p>
+        
+        {{ wtf.quick_form(form) }}
+        
+        
+        {% for m in message %}
+        <div class="card">
+          <div class="card-body">
+              <p class="card-text"><strong>{{ m }}</strong></p>
+          </div>
+        </div>
+        {% endfor %}
+        
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
