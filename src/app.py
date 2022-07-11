@@ -32,30 +32,31 @@ class Deposit(FlaskForm):
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/loan.html', methods=['GET', 'POST'])
 def loan():
-    
-
     form = Loan()
     message = []
     if form.validate_on_submit():
         amount = int(form.amount.data)
         maturity = int(form.maturity.data)
-        result = engine.calculate_loan(amount,maturity)
-        
-        if result.shape[0]>0:
-            for idx,row in result.iterrows():
-                message.append("Banka: "+ row['bank'].replace('-',' ').upper() + 
-                               " / Faiz Oranı: %" + str(row['interest_rate']) +
-                               " / Aylık Taksit: " + str(int(row['monthly_payment'])) + "TL" +
-                               " / Tahsis Ücreti: " + str(int(row['total_fee'])) + "TL" +
-                               " / Toplam Maliyet: " + str(int(row['total_cost'])) + "TL")
+        if amount>100000 and maturity>12:
+            message = ["100000TL üzeri tüketici kredileri maksimum 12 ay vade ile sınırlıdır."]
+        elif 50000 < amount <=100000 and maturity>24:
+            message = ["50000TL-100000TL(dahil) aralığı tüketici kredileri maksimum 24 ay vade ile sınırlıdır."]
         else:
-            message = ["Seçilen tutar ve/veya vade süresi uygun değil."]
+            result = engine.calculate_loan(amount,maturity)
+            
+            if result.shape[0]>0:
+                for idx,row in result.iterrows():
+                    message.append("Banka: "+ row['bank'].replace('-',' ').upper() + 
+                                   " / Faiz Oranı: %" + str(row['interest_rate']) +
+                                   " / Aylık Taksit: " + str(int(row['monthly_payment'])) + "TL" +
+                                   " / Tahsis Ücreti: " + str(int(row['total_fee'])) + "TL" +
+                                   " / Toplam Maliyet: " + str(int(row['total_cost'])) + "TL")
+            else:
+                message = ["Seçilen tutar ve/veya vade süresi uygun değil."]              
     return render_template('loan.html', form=form, message=message)
 
 @app.route('/deposit.html', methods=['GET', 'POST'])
 def deposit():
-    
-
     form = Deposit()
     message = []
     if form.validate_on_submit():
