@@ -21,7 +21,6 @@ class Engine:
         print(time.ctime(),'. Engine Initialized') 
         
     def read_rates(self,collection):
-        self.snpst_dt = datetime.strftime(datetime.now(),'%Y%m%d')
         result_data = self.db[collection].find().sort('date',pymongo.DESCENDING).limit(1)[0]['data']
         return result_data
 
