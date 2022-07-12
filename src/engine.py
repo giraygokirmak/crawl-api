@@ -2,6 +2,7 @@ import os
 import json
 import time
 from urllib.parse import quote_plus
+from datetime import datetime
 import pandas as pd
 import numpy_financial as npf
 import pymongo
@@ -20,7 +21,8 @@ class Engine:
         print(time.ctime(),'. Engine Initialized') 
         
     def read_rates(self,collection):
-        result_data = list(self.db[collection].find())[0]['data']
+        self.snpst_dt = datetime.strftime(datetime.now(),'%Y%m%d')
+        result_data = self.db[collection].find().sort('date',pymongo.DESCENDING).limit(1)[0]['data']
         return result_data
 
     def calculate_loan(self,amount,maturity):
