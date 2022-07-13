@@ -50,20 +50,17 @@ class Engine:
         deposit_data = self.read_rates('deposit_values')
         
         all_options = []
-        for short_name in deposit_data.keys():
-            deposit_df = pd.DataFrame(deposit_data[short_name])
+        for short_name in deposit_data['bank'].unique():
+            deposit_df = deposit_data[deposit_data['bank']==short_name].copy()
             
             selected_maturity = None
             if deposit_df.shape[0]>0:
                 max_amount = deposit_df['AnaPara'].max()
-                for col in deposit_df.columns:
-                    if 'AnaPara' not in col:
-                        deposit_df[col] = deposit_df[col].astype(float)
-
                 deposit_df = deposit_df[deposit_df['AnaPara']>=amount]   
                 deposit_df = deposit_df[deposit_df['AnaPara']==deposit_df['AnaPara'].min()]
+                cols = deposit_df.columns.drop(['bank','AnaPara','date'])
 
-                for item in range(1,len(deposit_df.columns)):
+                for item in range(1,len(cols)):
                     col = deposit_df.columns[item]
                     col_min_max = col.split('-')
                     if len(col_min_max)>1:
