@@ -5,27 +5,23 @@ from urllib.parse import quote_plus
 from datetime import datetime
 import pandas as pd
 import numpy_financial as npf
-import pymongo
+from sqlalchemy import create_engine
 
 class Engine:
 
-    def __init__(self):
-        
-        self.mongourl = os.environ['mongourl']
-        username = quote_plus(os.environ['username'])
-        password = quote_plus(os.environ['password'])
-        uri = 'mongodb+srv://' + username + ':' + password + '@' + self.mongourl + '/?retryWrites=true&w=majority'
-        self.client = pymongo.MongoClient(uri)
-        self.db = self.client['crawler-db']
+    def __init__(self):        
+        db_data = 'mysql+mysqldb://' + os.environ['username'] + ':' + os.environ['password'] + '@' + os.environ['dburl'] + ':3306/' \
+       + 'crawl-db' + '?charset=utf8mb4'
+        self.engine = create_engine(db_data)
             
         print(time.ctime(),'. Engine Initialized') 
         
     def read_rates(self,collection):
-        result_data = self.db[collection].find().sort('date',pymongo.DESCENDING).limit(1)[0]['data']
+        result_data = pd.read_sql(f'select * from {collection} where date=(select max(date) from {collection})', self.engine)
         return result_data
 
     def calculate_loan(self,amount,maturity):
-        loan_data = self.read_rates('loan-collection')
+        loan_data = self.read_rates('credit_values')
         loan_data_df = pd.DataFrame(loan_data)
         loan_data_df = loan_data_df[amount<=loan_data_df['max_amount']]
 
@@ -51,7 +47,7 @@ class Engine:
         return loan_data_df   
     
     def calculate_interests(self,amount,maturity):
-        deposit_data = self.read_rates('deposit-collection')
+        deposit_data = self.read_rates('deposit_values')
         
         all_options = []
         for short_name in deposit_data.keys():
