@@ -5,27 +5,23 @@ from urllib.parse import quote_plus
 from datetime import datetime
 import pandas as pd
 import numpy_financial as npf
-import pymongo
+from sqlalchemy import create_engine
 
 class Engine:
 
-    def __init__(self):
-        
-        self.mongourl = os.environ['mongourl']
-        username = quote_plus(os.environ['username'])
-        password = quote_plus(os.environ['password'])
-        uri = 'mongodb+srv://' + username + ':' + password + '@' + self.mongourl + '/?retryWrites=true&w=majority'
-        self.client = pymongo.MongoClient(uri)
-        self.db = self.client['crawler-db']
+    def __init__(self):        
+        db_data = 'mysql+mysqldb://' + os.environ['username'] + ':' + os.environ['password'] + '@' + os.environ['dburl'] + ':3306/' \
+       + 'crawl-db' + '?charset=utf8mb4'
+        self.engine = create_engine(db_data)
             
         print(time.ctime(),'. Engine Initialized') 
         
     def read_rates(self,collection):
-        result_data = self.db[collection].find().sort('date',pymongo.DESCENDING).limit(1)[0]['data']
+        result_data = pd.read_sql(f'select * from {collection} where date=(select max(date) from {collection})', self.engine)
         return result_data
 
     def calculate_loan(self,amount,maturity):
-        loan_data = self.read_rates('loan-collection')
+        loan_data = self.read_rates('credit_values')
         loan_data_df = pd.DataFrame(loan_data)
         loan_data_df = loan_data_df[amount<=loan_data_df['max_amount']]
 
@@ -51,23 +47,20 @@ class Engine:
         return loan_data_df   
     
     def calculate_interests(self,amount,maturity):
-        deposit_data = self.read_rates('deposit-collection')
+        deposit_data = self.read_rates('deposit_values')
         
         all_options = []
-        for short_name in deposit_data.keys():
-            deposit_df = pd.DataFrame(deposit_data[short_name])
+        for short_name in deposit_data['bank'].unique():
+            deposit_df = deposit_data[deposit_data['bank']==short_name].copy()
             
             selected_maturity = None
             if deposit_df.shape[0]>0:
                 max_amount = deposit_df['AnaPara'].max()
-                for col in deposit_df.columns:
-                    if 'AnaPara' not in col:
-                        deposit_df[col] = deposit_df[col].astype(float)
-
                 deposit_df = deposit_df[deposit_df['AnaPara']>=amount]   
                 deposit_df = deposit_df[deposit_df['AnaPara']==deposit_df['AnaPara'].min()]
+                cols = deposit_df.columns.drop(['bank','AnaPara','date'])
 
-                for item in range(1,len(deposit_df.columns)):
+                for item in range(1,len(cols)):
                     col = deposit_df.columns[item]
                     col_min_max = col.split('-')
                     if len(col_min_max)>1:
