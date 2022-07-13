@@ -63,7 +63,7 @@ def deposit():
         amount = int(form.amount.data)
         maturity = int(form.maturity.data)
         result = engine.calculate_interests(amount,maturity)
-        tax = 0.05 if maturity <= 181 else 0.03
+        tax = 0.05 if maturity < 181 else 0.03
         if result.shape[0]>0:
             for idx,row in result.iterrows():
                 return_amount = (float(row['interest_rate'])*amount*maturity)/36500
