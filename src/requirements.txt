@@ -16,3 +16,4 @@ WTForms==2.1
 pandas==1.4.1
 numpy-financial==1.0.0
 mysqlclient==2.1.1
+sqlalchemy==1.4.39
