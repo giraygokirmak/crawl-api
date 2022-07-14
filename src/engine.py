@@ -21,12 +21,11 @@ class Engine:
         print(time.ctime(),'. Engine Initialized') 
         
     def read_rates(self,collection):
-        result_data = self.db[collection].find().sort('date',pymongo.DESCENDING).limit(1)[0]['data']
+        result_data = pd.DataFrame(self.db[collection].find().sort('date',pymongo.DESCENDING).limit(1)[0]['data'])
         return result_data
 
     def calculate_loan(self,amount,maturity):
-        loan_data = self.read_rates('loan-collection')
-        loan_data_df = pd.DataFrame(loan_data)
+        loan_data_df = self.read_rates('loan-collection')
         loan_data_df = loan_data_df[amount<=loan_data_df['max_amount']]
 
         for bank in loan_data_df['bank'].unique():
@@ -54,6 +53,7 @@ class Engine:
         deposit_data = self.read_rates('deposit-collection')
         
         all_options = []
+        
         for short_name in deposit_data['bank'].unique():
             deposit_df = deposit_data[deposit_data['bank']==short_name].copy()
             
@@ -62,7 +62,7 @@ class Engine:
                 max_amount = deposit_df['AnaPara'].max()
                 deposit_df = deposit_df[deposit_df['AnaPara']>=amount]   
                 deposit_df = deposit_df[deposit_df['AnaPara']==deposit_df['AnaPara'].min()]
-                cols = deposit_df.columns.drop(['bank','AnaPara','date'])
+                cols = deposit_df.columns.drop(['bank','AnaPara'])
 
                 for item in range(1,len(cols)):
                     col = deposit_df.columns[item]
