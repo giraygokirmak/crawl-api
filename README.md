@@ -1,6 +1,8 @@
 # crawl-api
+First build docker image by:
+docker build . -t crawl-api
 To run Web App directly:
-docker run -itd --name crawl-api -p 5000:5000 --restart always -e dburl=SERVER.HOSTNAME -e username=KULLANICIADI -e password=SIFRE crawl-api
+docker run -itd --name crawl-api -p 80:5000 --restart always -e dburl=SERVER.HOSTNAME -e username=KULLANICIADI -e password=SIFRE crawl-api
 
 To scale up for increasing load:
 Deploy multiple direct nodes into a cluster and, deploy nginx with tutorial:
